@@ -1,29 +1,33 @@
-# This is a code by Alexander Bergman, Hertford College, University of Oxford.
-# The purpose of this code is to build a controller for a UUV (Unmanned Underwater Vehicle) that can navigate to a target position using PD control.
-# Code started on 15/10/2026
-
-def PD_Controller(current_position, target_position, current_velocity, Kp, Kd):
+def PD_Controller(current_position, target_position, Kp, Kd, previous_error):
     """
-    PD Controller for UUV navigation.
+    This is a Proportional-derivative controller designed to allow a UUV to navigate a cave.
+    It should model the following equation accurately:
 
-    Parameters:
-    current_position (tuple): Current position of the UUV (x, y, z).
-    target_position (tuple): Target position for the UUV (x, y, z).
-    current_velocity (tuple): Current velocity of the UUV (vx, vy, vz).
-    Kp (float): Proportional gain.
-    Kd (float): Derivative gain.
+            u[t] = Kp * e[t] + Kd * (e[t] - e[t-1]), where e[t] = r[t] - y[t]
+            For this controller to work, we assume that e[-1] = 0
 
-    Returns:
-    tuple: Control output (control_x, control_y, control_z).
+    Inputs:
+    current_position: The current position of the submarine (y)
+    target_position: The position where the submarine should be in that timestep (y)
+    Kp: The coefficient of the proportional term within the governing control equation
+    Kd: The coefficient of the derivative term within the governing control equation
+    previous_error: the error from the iteration completed before the current one (should start at 0)
+
+    Outputs:
+    control_signal: The signal that will be output which should control the submarine's movement to reduce error between current position and target position.
+    error: The error from this timestep, which can be used in the next iteration 
+
+    Written by Alexander Bergman, Hertford College, Oxford University
     """
-    
-    # Calculate the error between the target and current position
-    error = [target - current for target, current in zip(target_position, current_position)]
-    
-    # Calculate the derivative of the error (change in error)
-    derivative = [-velocity for velocity in current_velocity]
-    
-    # Calculate control output using PD formula
-    control_output = [Kp * e + Kd * d for e, d in zip(error, derivative)]
-    
-    return tuple(control_output)
+    # Firstly we need to calculate the error between the current and target position:
+    error = target_position - current_position
+
+    # Now we calculate the derivative term, which is e[t] - e[t-1].
+    derivative_error = error - previous_error
+    Output = (Kp * error + Kd * derivative_error)
+
+    return Output, error
+
+# Now this code can be implemented
+# Note that the current error must become the previous error for the next timestep
+# Therefore implement something like previous_error = error at end of loop.
