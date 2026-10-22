@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from .terrain import generate_reference_and_limits
-from control import PD_Controller
+from .control import PD_Controller
 
 class Submarine:
     def __init__(self):
@@ -108,7 +108,7 @@ class ClosedLoop:
             observation_t = self.plant.get_depth()
 
             # CONTROLLER;
-            # required inputs: tj
+            # required inputs: current pos, target pos, Kp, Kd, prev error
             # required outputs: action, error (for p)
             actions[t], error = PD_Controller(observation_t, mission.reference[t], self.kp, self.kd, error)
             
